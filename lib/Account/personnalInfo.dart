@@ -7,21 +7,30 @@ class PersonnalInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.all(10),
-        height: 150,
-        width: 500,
         padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(10),
+        height: 180,
+        width: 500,
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black),
             borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: const Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text("Informations personnelles"),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.account_box_rounded),
+              Text(
+                "Informations personnelles",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ]),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Adresse mail"),
+                Text(
+                  "Adresse mail",
+                  style: TextStyle(fontSize: 16),
+                ),
                 MyDropDownMenu(items: [
                   'Martin@gmail.com',
                   'Mamadou@gmail.com',
@@ -31,8 +40,14 @@ class PersonnalInfo extends StatelessWidget {
               ],
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Nom/Prénom"),
+                Text(
+                  "Nom/Prénom",
+                  style: TextStyle(fontSize: 16),
+                ),
+                MyDropDownMenu(
+                    items: ['Martin', 'Mamadou', 'Tanguy', 'Keryann'])
               ],
             )
           ],

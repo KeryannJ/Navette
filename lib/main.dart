@@ -72,8 +72,27 @@ class NavetteState extends State<Navette> {
                 ),
                 const Text('Navette'),
                 Row(children: [
-                  IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.notifications)),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.notifications),
+                    onSelected: (String result) {
+                      // TODO gérer la sélection d'une notification
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Notif 1',
+                        child: Text('Notif 1'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Notif 2',
+                        child: Text('Notif 2'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Notif 3',
+                        child: Text('Notif 3'),
+                      ),
+                    ],
+                  ),
                   IconButton(
                       onPressed: () {
                         Navigator.of(context).push(showAccount());
