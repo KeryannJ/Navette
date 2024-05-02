@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 class Itineraire extends StatelessWidget {
   const Itineraire({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [

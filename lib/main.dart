@@ -1,11 +1,19 @@
 import 'package:application/Driver/driver.dart';
+import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:application/History/history.dart';
 import 'package:application/Itinerary/itinerary.dart';
 import 'package:application/Account/account.dart';
 import 'package:application/Settings/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+Future<void> initPreferences() async {
+  PreferenceHelper.setPrefs(await SharedPreferences.getInstance());
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initPreferences();
   runApp(const MaterialApp(home: Navette()));
 }
 

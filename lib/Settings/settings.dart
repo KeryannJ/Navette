@@ -1,15 +1,39 @@
+import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   const Settings({super.key});
 
   @override
+  State<Settings> createState() => _Settings();
+}
+
+class _Settings extends State<Settings> {
+  TextEditingController navette = TextEditingController();
+  TextEditingController maps = TextEditingController();
+
+  @override
+  void initState() {
+    navette.text = PreferenceHelper.navetteApi;
+    maps.text = PreferenceHelper.mapsApi;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    PreferenceHelper.setAPIValues(navette.text, maps.text);
+    navette.dispose();
+    maps.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
         body: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -19,27 +43,29 @@ class Settings extends StatelessWidget {
           ],
         ),
         Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: SizedBox(
             width: 300,
             child: TextField(
+              controller: navette,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Clé API Navette',
+                labelText: 'API Navette',
               ),
             ),
           ),
         ),
         Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: SizedBox(
             width: 300,
             child: TextField(
+              controller: maps,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Clé API Google Maps',
+                labelText: 'API Google Maps',
               ),
             ),
           ),
