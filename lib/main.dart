@@ -108,8 +108,10 @@ class NavetteState extends State<Navette> {
                       icon: const Icon(Icons.account_circle)),
                   IconButton(
                       icon: const Icon(Icons.settings_rounded),
-                      onPressed: () {
-                        Navigator.of(context).push(showSettings());
+                      onPressed: () async {
+                        SharedPreferences prefs = (await Navigator.of(context)
+                            .push(showSettings())) as SharedPreferences;
+                        PreferenceHelper.setPrefs(prefs);
                       }),
                 ])
               ],

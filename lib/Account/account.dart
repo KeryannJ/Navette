@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:application/Common/loadingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:application/Account/personnalInfo.dart';
@@ -142,7 +143,7 @@ class _AccountState extends State<Account> {
               } else if (snapshot.hasError) {
                 return const Text('Erreur');
               } else {
-                return const CircularProgressIndicator();
+                return const LoadingPage();
               }
             },
           )
@@ -160,14 +161,12 @@ class _AccountState extends State<Account> {
                       Map<String, dynamic> userData = snapshot.data![index];
                       return ListTile(
                           title: Text(userData['name'],
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold)), // Nom en gras
-                          subtitle:
-                              Text(userData['email']), // Email comme sous-titre
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(userData['email']),
                           leading: CircleAvatar(
                             backgroundColor: Colors.amber,
-                            child: Text(userData['name'].substring(
-                                0, 1)), // Affiche la première lettre du nom
+                            child: Text(userData['name'].substring(0, 1)),
                           ),
                           trailing: const Icon(Icons.arrow_forward_ios),
                           onTap: () {
@@ -182,7 +181,7 @@ class _AccountState extends State<Account> {
               } else if (snapshot.hasError) {
                 return const Text('Erreur');
               } else {
-                return const Scaffold(body: CircularProgressIndicator());
+                return const LoadingPage();
               }
             });
   }

@@ -66,9 +66,9 @@ class PreferenceHelper {
     prefs.setInt(aStr, aInt);
   }
 
-  static void setAPIValues(String navette, String bearer) {
-    prefs.setString(navetteAPIKey, navette);
-    prefs.setString(bearerKey, bearer);
+  static Future<void> setAPIValues(String navette, String bearer) async {
+    await prefs.setString(navetteAPIKey, navette);
+    await prefs.setString(bearerKey, bearer);
   }
 
   static void setUserId(int uid) {

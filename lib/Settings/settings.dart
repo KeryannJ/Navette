@@ -11,6 +11,7 @@ class Settings extends StatefulWidget {
 class _Settings extends State<Settings> {
   TextEditingController navette = TextEditingController();
   TextEditingController bearer = TextEditingController();
+  bool showPassword = false;
 
   @override
   void initState() {
@@ -19,13 +20,18 @@ class _Settings extends State<Settings> {
     super.initState();
   }
 
-  void savePrefs() {
-    PreferenceHelper.setAPIValues(navette.text, bearer.text);
+  Future<void> savePrefs() async {
+    if (!navette.text.startsWith('https://')) {
+      navette.text = 'https://${navette.text}';
+    }
+    if (!navette.text.endsWith('/')) {
+      navette.text = '${navette.text}/';
+    }
+    await PreferenceHelper.setAPIValues(navette.text, bearer.text);
   }
 
   @override
   void dispose() {
-    savePrefs();
     bearer.dispose();
     navette.dispose();
     super.dispose();
@@ -50,7 +56,6 @@ class _Settings extends State<Settings> {
           width: 300,
           child: TextField(
             controller: navette,
-            obscureText: true,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'API Navette',
@@ -59,18 +64,44 @@ class _Settings extends State<Settings> {
         ),
       ),
       Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 250,
+                child: TextField(
+                  controller: bearer,
+                  obscureText: !showPassword,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Bearer Navette',
+                  ),
+                ),
+              ),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      showPassword = !showPassword;
+                    });
+                  },
+                  icon: Icon(
+                      showPassword ? Icons.visibility_off : Icons.visibility))
+            ],
+          )),
+      Padding(
         padding: const EdgeInsets.all(8),
         child: SizedBox(
-          width: 300,
-          child: TextField(
-            controller: bearer,
-            obscureText: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Bearer Navette',
-            ),
-          ),
-        ),
+            width: 300,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                savePrefs().then(
+                  (value) => Navigator.of(context).pop(PreferenceHelper.prefs),
+                );
+              },
+              icon: const Icon(Icons.save),
+              label: const Text('Sauvegarder et quitter'),
+            )),
       ),
     ]));
   }
