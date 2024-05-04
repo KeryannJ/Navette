@@ -46,7 +46,8 @@ class NavetteState extends State<Navette> {
 
   Route showAccount() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Account(),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          Account(prefs: PreferenceHelper.prefs),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;

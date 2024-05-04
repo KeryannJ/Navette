@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class VehicleInfo extends StatelessWidget {
-  const VehicleInfo({super.key});
+  const VehicleInfo(
+      {super.key,
+      required this.modele,
+      required this.couleur,
+      required this.plaque});
+  final String modele;
+  final String couleur;
+  final String plaque;
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +20,10 @@ class VehicleInfo extends StatelessWidget {
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black),
             borderRadius: const BorderRadius.all(Radius.circular(10))),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Icon(Icons.car_repair),
               Text(
                 "Informations du véhicule",
@@ -24,12 +31,12 @@ class VehicleInfo extends StatelessWidget {
               ),
             ]),
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: SizedBox(
                 width: 300,
                 child: TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
+                  controller: TextEditingController(text: modele),
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Modèle',
                   ),
@@ -37,12 +44,12 @@ class VehicleInfo extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: SizedBox(
                 width: 300,
                 child: TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
+                  controller: TextEditingController(text: couleur),
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Couleur',
                   ),
@@ -50,12 +57,12 @@ class VehicleInfo extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: SizedBox(
                 width: 300,
                 child: TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
+                  controller: TextEditingController(text: plaque),
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Plaque',
                   ),
