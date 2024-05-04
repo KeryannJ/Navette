@@ -79,7 +79,6 @@ class NavetteState extends State<Navette> {
                   height: 70,
                   width: 70,
                 ),
-                const Text('Navette'),
                 Row(children: [
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.notifications),

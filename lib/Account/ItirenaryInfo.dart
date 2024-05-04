@@ -4,11 +4,14 @@ import 'package:application/Common/dropDownMenu.dart';
 import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ItirenaryInfo extends StatefulWidget {
-  const ItirenaryInfo({super.key, required this.city, required this.zone});
+  const ItirenaryInfo(
+      {super.key, required this.city, required this.zone, required this.prefs});
   final int city;
   final int zone;
+  final SharedPreferences prefs;
 
   @override
   State<ItirenaryInfo> createState() => _ItirenaryInfo();
@@ -20,12 +23,18 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
   List<String> villes = [];
   List<String> currentZones = [];
 
+  @override
+  void initState() {
+    PreferenceHelper.setPrefs(widget.prefs);
+    super.initState();
+  }
+
   Future<List<dynamic>> fetchCityAndZone() async {
     var url = Uri.parse('${PreferenceHelper.navetteApi}api/v1/city/');
 
     try {
       http.Response response = await http.get(url, headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8',
         'Authorization': 'Bearer ${PreferenceHelper.bearer}'
       });
       if (response.statusCode == 200) {
@@ -38,7 +47,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
               '${PreferenceHelper.navetteApi}api/v1/city/$cityToFind');
         }
         http.Response responseZone = await http.get(urlZone, headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json;charset=UTF-8',
           'Authorization': 'Bearer ${PreferenceHelper.bearer}'
         });
         if (responseZone.statusCode == 200) {

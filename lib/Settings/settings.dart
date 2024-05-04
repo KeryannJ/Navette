@@ -10,18 +10,17 @@ class Settings extends StatefulWidget {
 
 class _Settings extends State<Settings> {
   TextEditingController navette = TextEditingController();
-  TextEditingController maps = TextEditingController();
   TextEditingController bearer = TextEditingController();
 
   @override
   void initState() {
     navette.text = PreferenceHelper.navetteApi;
-    maps.text = PreferenceHelper.mapsApi;
+    bearer.text = PreferenceHelper.bearer;
     super.initState();
   }
 
   void savePrefs() {
-    PreferenceHelper.setAPIValues(navette.text, maps.text, bearer.text);
+    PreferenceHelper.setAPIValues(navette.text, bearer.text);
   }
 
   @override
@@ -29,7 +28,6 @@ class _Settings extends State<Settings> {
     savePrefs();
     bearer.dispose();
     navette.dispose();
-    maps.dispose();
     super.dispose();
   }
 
@@ -70,20 +68,6 @@ class _Settings extends State<Settings> {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Bearer Navette',
-            ),
-          ),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: 300,
-          child: TextField(
-            controller: maps,
-            obscureText: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'API Google Maps',
             ),
           ),
         ),

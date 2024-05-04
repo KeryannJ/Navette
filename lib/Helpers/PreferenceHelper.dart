@@ -2,19 +2,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceHelper {
   static String navetteAPIKey = 'NAVETTE';
-  static String mapsAPIKey = 'MAPS';
   static String bearerKey = 'BEARER';
+  static String userIdKey = 'USERID';
 
   static String navetteApi = '';
-  static String mapsApi = '';
   static String bearer = '';
+  static int userId = -1;
 
   static late SharedPreferences prefs;
 
   static getAllPref() {
     bearer = isNullString(prefs.getString(bearerKey));
     navetteApi = isNullString(prefs.getString(navetteAPIKey));
-    mapsApi = isNullString(prefs.getString(mapsAPIKey));
+    userId = isNullInt(prefs.getInt(userIdKey), -1);
   }
 
   static void setPrefs(SharedPreferences tmpprefs) {
@@ -66,9 +66,12 @@ class PreferenceHelper {
     prefs.setInt(aStr, aInt);
   }
 
-  static void setAPIValues(String navette, String maps, String bearer) {
+  static void setAPIValues(String navette, String bearer) {
     prefs.setString(navetteAPIKey, navette);
-    prefs.setString(mapsAPIKey, maps);
     prefs.setString(bearerKey, bearer);
+  }
+
+  static void setUserId(int uid) {
+    prefs.setInt(userIdKey, uid);
   }
 }

@@ -26,7 +26,7 @@ class _AccountState extends State<Account> {
 
     try {
       http.Response response = await http.get(url, headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8',
         'Authorization': 'Bearer ${PreferenceHelper.bearer}'
       });
       if (response.statusCode == 200) {
@@ -47,7 +47,7 @@ class _AccountState extends State<Account> {
 
     try {
       http.Response response = await http.get(url, headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8',
         'Authorization': 'Bearer ${PreferenceHelper.bearer}'
       });
       if (response.statusCode == 200) {
@@ -66,6 +66,7 @@ class _AccountState extends State<Account> {
   @override
   void initState() {
     PreferenceHelper.setPrefs(widget.prefs);
+    userId = PreferenceHelper.userId;
     super.initState();
   }
 
@@ -79,52 +80,63 @@ class _AccountState extends State<Account> {
                 return Scaffold(
                   body: SingleChildScrollView(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 50.0),
-                          child: CircleAvatar(
-                            radius: 60,
-                            backgroundImage: AssetImage("assets/logo.png"),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 50.0),
+                            child: CircleAvatar(
+                              radius: 60,
+                              backgroundImage: AssetImage("assets/logo.png"),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                (selectedUserData['verified'] as bool)
-                                    ? Icons.verified
-                                    : Icons.close,
-                                size: 30,
-                              ),
-                              Text(
-                                (selectedUserData['verified'] as bool)
-                                    ? 'Vérifié'
-                                    : 'Non Vérifié',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20),
-                              )
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  (selectedUserData['verified'] as bool)
+                                      ? Icons.verified
+                                      : Icons.close,
+                                  size: 30,
+                                ),
+                                Text(
+                                  (selectedUserData['verified'] as bool)
+                                      ? 'Vérifié'
+                                      : 'Non Vérifié',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                        PersonnalInfo(
-                          name: selectedUserData['name'],
-                          mail: selectedUserData['email'],
-                        ),
-                        VehicleInfo(
-                          modele: selectedUserData['vehicle_model'],
-                          couleur: selectedUserData['vehicle_color'],
-                          plaque: selectedUserData['vehicle_registration'],
-                        ),
-                        ItirenaryInfo(
-                          city: selectedUserData['city']['id'],
-                          zone: selectedUserData['zone']['id'],
-                        ),
-                      ],
-                    ),
+                          PersonnalInfo(
+                            name: selectedUserData['name'],
+                            mail: selectedUserData['email'],
+                          ),
+                          VehicleInfo(
+                            modele: selectedUserData['vehicle_model'],
+                            couleur: selectedUserData['vehicle_color'],
+                            plaque: selectedUserData['vehicle_registration'],
+                          ),
+                          ItirenaryInfo(
+                            city: selectedUserData['city']['id'],
+                            zone: selectedUserData['zone']['id'],
+                            prefs: widget.prefs,
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                PreferenceHelper.setUserId(-1);
+                                userId = -1;
+                              });
+                            },
+                            icon: const Icon(Icons.change_circle_outlined),
+                            label: const Text('Changer d\'utilisateur'),
+                          )
+                        ]),
                   ),
                 );
               } else if (snapshot.hasError) {
@@ -147,10 +159,21 @@ class _AccountState extends State<Account> {
                     itemBuilder: (context, index) {
                       Map<String, dynamic> userData = snapshot.data![index];
                       return ListTile(
-                          title: Text(userData['name']),
+                          title: Text(userData['name'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)), // Nom en gras
+                          subtitle:
+                              Text(userData['email']), // Email comme sous-titre
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.amber,
+                            child: Text(userData['name'].substring(
+                                0, 1)), // Affiche la première lettre du nom
+                          ),
+                          trailing: const Icon(Icons.arrow_forward_ios),
                           onTap: () {
                             setState(() {
                               userId = snapshot.data![index]['id'];
+                              PreferenceHelper.setUserId(userId);
                             });
                           });
                     },
