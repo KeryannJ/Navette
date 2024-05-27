@@ -1,19 +1,17 @@
 import 'package:application/Driver/driver.dart';
+import 'package:application/Helpers/CityHelper.dart';
 import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:application/History/history.dart';
 import 'package:application/Itinerary/itinerary.dart';
 import 'package:application/Account/account.dart';
 import 'package:application/Settings/settings.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-Future<void> initPreferences() async {
-  PreferenceHelper.setPrefs(await SharedPreferences.getInstance());
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initPreferences();
+  await PreferenceHelper.init();
+  await CityHelper.fetchCityAndZoneAndStop();
+  await CityHelper.getUserItirenaryInfo();
   runApp(const MaterialApp(home: Navette()));
 }
 
@@ -24,7 +22,15 @@ class Navette extends StatefulWidget {
   State<Navette> createState() => NavetteState();
 }
 
-class NavetteState extends State<Navette> {
+class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
+  late TabController tabC;
+
+  @override
+  void initState() {
+    tabC = TabController(length: 3, vsync: this);
+    super.initState();
+  }
+
   Route showSettings() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => const Settings(),
@@ -46,8 +52,7 @@ class NavetteState extends State<Navette> {
 
   Route showAccount() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          Account(prefs: PreferenceHelper.prefs),
+      pageBuilder: (context, animation, secondaryAnimation) => const Account(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
@@ -102,30 +107,38 @@ class NavetteState extends State<Navette> {
                     ],
                   ),
                   IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(showAccount());
+                      onPressed: () async {
+                        await Navigator.of(context).push(showAccount());
+                        await PreferenceHelper.init();
                       },
                       icon: const Icon(Icons.account_circle)),
                   IconButton(
                       icon: const Icon(Icons.settings_rounded),
                       onPressed: () async {
-                        SharedPreferences prefs = (await Navigator.of(context)
-                            .push(showSettings())) as SharedPreferences;
-                        PreferenceHelper.setPrefs(prefs);
+                        await Navigator.of(context).push(showSettings());
+                        await PreferenceHelper.init();
+                        await CityHelper.fetchCityAndZoneAndStop();
                       }),
                 ])
               ],
             ),
-            bottom: const TabBar(
-              tabs: [
+            bottom: TabBar(
+              onTap: (value) {
+                if (!CityHelper.travelOngoing) {
+                  tabC.animateTo(value);
+                }
+              },
+              tabs: const [
                 Tab(text: 'Itinéraire', icon: Icon(Icons.transform)),
                 Tab(text: 'Conducteur', icon: Icon(Icons.directions_car)),
                 Tab(text: 'Historique', icon: Icon(Icons.history)),
               ],
             ),
           ),
-          body: const TabBarView(
-            children: [
+          body: TabBarView(
+            controller: tabC,
+            physics: const NeverScrollableScrollPhysics(),
+            children: const [
               Itineraire(),
               Driver(),
               History(),

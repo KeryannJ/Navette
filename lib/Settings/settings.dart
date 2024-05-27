@@ -1,3 +1,5 @@
+import 'package:application/Common/loadingPage.dart';
+import 'package:application/Helpers/CityHelper.dart';
 import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +14,18 @@ class _Settings extends State<Settings> {
   TextEditingController navette = TextEditingController();
   TextEditingController bearer = TextEditingController();
   bool showPassword = false;
+  bool isloading = true;
+  PreferenceHelper pref = PreferenceHelper();
 
   @override
   void initState() {
-    navette.text = PreferenceHelper.navetteApi;
-    bearer.text = PreferenceHelper.bearer;
+    PreferenceHelper.init().then((value) {
+      setState(() {
+        isloading = false;
+        navette.text = PreferenceHelper.navetteApi;
+        bearer.text = PreferenceHelper.bearer;
+      });
+    });
     super.initState();
   }
 
@@ -39,70 +48,75 @@ class _Settings extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Paramètres",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          )
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: 300,
-          child: TextField(
-            controller: navette,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'API Navette',
+    return (isloading)
+        ? const LoadingPage()
+        : Scaffold(
+            body:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Paramètres",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                )
+              ],
             ),
-          ),
-        ),
-      ),
-      Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 250,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SizedBox(
+                width: 300,
                 child: TextField(
-                  controller: bearer,
-                  obscureText: !showPassword,
+                  controller: navette,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Bearer Navette',
+                    labelText: 'API Navette',
                   ),
                 ),
               ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      showPassword = !showPassword;
-                    });
-                  },
-                  icon: Icon(
-                      showPassword ? Icons.visibility_off : Icons.visibility))
-            ],
-          )),
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-            width: 300,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                savePrefs().then(
-                  (value) => Navigator.of(context).pop(PreferenceHelper.prefs),
-                );
-              },
-              icon: const Icon(Icons.save),
-              label: const Text('Sauvegarder et quitter'),
-            )),
-      ),
-    ]));
+            ),
+            Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 250,
+                      child: TextField(
+                        controller: bearer,
+                        obscureText: !showPassword,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Bearer Navette',
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        icon: Icon(showPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility))
+                  ],
+                )),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SizedBox(
+                  width: 300,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await savePrefs();
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    icon: const Icon(Icons.save),
+                    label: const Text('Sauvegarder et quitter'),
+                  )),
+            ),
+          ]));
   }
 }

@@ -1,6 +1,17 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async' show Future;
 
 class PreferenceHelper {
+  static Future<SharedPreferences> get _instance async =>
+      _prefsInstance ??= await SharedPreferences.getInstance();
+
+  static SharedPreferences? _prefsInstance;
+
+  static Future<void> init() async {
+    _prefsInstance = await _instance;
+    getAllPref();
+  }
+
   static String navetteAPIKey = 'NAVETTE';
   static String bearerKey = 'BEARER';
   static String userIdKey = 'USERID';
@@ -9,21 +20,10 @@ class PreferenceHelper {
   static String bearer = '';
   static int userId = -1;
 
-  static late SharedPreferences prefs;
-
-  static getAllPref() {
-    bearer = isNullString(prefs.getString(bearerKey));
-    navetteApi = isNullString(prefs.getString(navetteAPIKey));
-    userId = isNullInt(prefs.getInt(userIdKey), -1);
-  }
-
-  static void setPrefs(SharedPreferences tmpprefs) {
-    prefs = tmpprefs;
-    getAllPref();
-  }
-
-  static SharedPreferences getPrefs() {
-    return prefs;
+  static void getAllPref() {
+    bearer = isNullString(_prefsInstance!.getString(bearerKey));
+    navetteApi = isNullString(_prefsInstance!.getString(navetteAPIKey));
+    userId = isNullInt(_prefsInstance!.getInt(userIdKey), -1);
   }
 
   static bool isNullBool(bool? aBool) {
@@ -55,7 +55,7 @@ class PreferenceHelper {
   }
 
   static void saveKeyBool(String aStr, bool aBool) {
-    prefs.setBool(aStr, aBool);
+    _prefsInstance!.setBool(aStr, aBool);
   }
 
   static void setIntValue(String aStr, int aInt) {
@@ -63,15 +63,15 @@ class PreferenceHelper {
   }
 
   static void saveKeyInt(String aStr, int aInt) {
-    prefs.setInt(aStr, aInt);
+    _prefsInstance!.setInt(aStr, aInt);
   }
 
   static Future<void> setAPIValues(String navette, String bearer) async {
-    await prefs.setString(navetteAPIKey, navette);
-    await prefs.setString(bearerKey, bearer);
+    await _prefsInstance!.setString(navetteAPIKey, navette);
+    await _prefsInstance!.setString(bearerKey, bearer);
   }
 
   static void setUserId(int uid) {
-    prefs.setInt(userIdKey, uid);
+    _prefsInstance!.setInt(userIdKey, uid);
   }
 }

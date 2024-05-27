@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class MyDropDownMenu extends StatefulWidget {
   final List<String> items;
-  const MyDropDownMenu({super.key, required this.items, this.changeZone});
-  final Function? changeZone;
+  const MyDropDownMenu({super.key, required this.items, this.change});
+  final Function? change;
   @override
   State<MyDropDownMenu> createState() => _MyDropDownMenuState();
 }
@@ -35,8 +35,8 @@ class _MyDropDownMenuState extends State<MyDropDownMenu> {
       onChanged: (String? newValue) {
         setState(() {
           dropdownValue = newValue!;
-          if (widget.changeZone != null) {
-            widget.changeZone!(newValue);
+          if (widget.change != null) {
+            widget.change!(newValue);
           }
         });
       },
