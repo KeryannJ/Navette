@@ -37,6 +37,7 @@ class MapSampleState extends State<Driver> {
     location = Location();
     location.requestPermission().then((granted) {
       if (granted == PermissionStatus.granted) {
+        location.getLocation().then((value) => currentPosition = value);
         location.onLocationChanged.listen((LocationData position) {
           if (mounted) {
             setState(() {
@@ -125,7 +126,7 @@ class MapSampleState extends State<Driver> {
         LatLng(double.parse(latLngD.first), double.parse(latLngD.last));
 
     List<String> latLngA =
-        CityHelper.villesDict[2]!.zones[travel[3] - 1].gps!.split(',');
+        CityHelper.villesDict[travel[2]]!.zones[travel[3] - 1].gps!.split(',');
     LatLng arrivee =
         LatLng(double.parse(latLngA.first), double.parse(latLngA.last));
 
@@ -156,7 +157,7 @@ class MapSampleState extends State<Driver> {
         markerId: const MarkerId('destination'),
         position: LatLng(destinationLatitude, destinationLongitude)));
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      '',
+      '', // secret Google Maps
       PointLatLng(currentPosition.latitude!, currentPosition.longitude!),
       PointLatLng(destinationLatitude, destinationLongitude),
       wayPoints: [PolylineWayPoint(location: depart)],
@@ -196,7 +197,7 @@ class MapSampleState extends State<Driver> {
       radius: position.accuracy!,
       strokeWidth: 1,
       strokeColor: Colors.red,
-      fillColor: Colors.red,
+      fillColor: Color.fromARGB(100, 255, 0, 0),
     ));
   }
 
@@ -231,22 +232,33 @@ class MapSampleState extends State<Driver> {
         print(e);
       }
     } else {
-      // TODO attendre endpoint Tanguy
-      // try {
-      //   http.Response response = await http.post(url,
-      //       headers: {
-      //         'Content-Type': 'application/json;charset=UTF-8',
-      //         'Authorization': 'Bearer ${PreferenceHelper.bearer}'
-      //       },
-      //       body: jsonEncode({
-      //         'departure': CityHelper.getDeparture(),
-      //         'arrival': CityHelper.getArrival(),
-      //         'back_travel': false,
-      //         'driver_id': PreferenceHelper.userId,
-      //       }));
-      // } catch (e) {
-      //   print(e);
-      // }
+      var travelId = -1;
+      var urlTravelId = Uri.parse(
+          '${PreferenceHelper.navetteApi}api/v1/user/${PreferenceHelper.userId}/current_travel');
+      try {
+        http.Response response = await http.get(urlTravelId, headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+        });
+        if (response.statusCode == 200) {
+          travelId = jsonDecode(response.body)['id'];
+        }
+      } catch (e) {
+        print(e);
+      }
+      var url = Uri.parse(
+          '${PreferenceHelper.navetteApi}api/v1/travel/$travelId/finish');
+      try {
+        http.Response response = await http.patch(url, headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+        });
+        if (response.statusCode == 200) {
+          print('fini');
+        }
+      } catch (e) {
+        print(e);
+      }
     }
   }
 }

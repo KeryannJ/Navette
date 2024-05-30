@@ -38,14 +38,14 @@ class StopWidget extends StatelessWidget {
                               .isEmpty
                           ? Image.asset(
                               'assets/logo.png',
-                              height: 75,
-                              width: 75,
+                              height: 90,
+                              width: 90,
                             )
                           : Image.network(
                               CityHelper.getImage(
-                                  true, true, false, [villeD, stop]),
-                              height: 75,
-                              width: 75,
+                                  false, true, false, [villeD, stop]),
+                              height: 90,
+                              width: 90,
                             ),
                       Text(CityHelper.getStopNameOfCity(villeD, stop).first),
                     ],
@@ -60,14 +60,14 @@ class StopWidget extends StatelessWidget {
                               .isEmpty
                           ? Image.asset(
                               'assets/logo.png',
-                              height: 75,
-                              width: 75,
+                              height: 90,
+                              width: 90,
                             )
                           : Image.network(
                               CityHelper.getImage(
                                   false, false, true, [villeA, zone]),
-                              height: 75,
-                              width: 75,
+                              height: 90,
+                              width: 90,
                             ),
                       Text(CityHelper.getZoneNameOfCity(villeA, zone).first),
                     ],
@@ -75,7 +75,7 @@ class StopWidget extends StatelessWidget {
                 ]),
                 Row(children: [
                   const Icon(Icons.account_circle_outlined),
-                  // Todo Trouver un moyen de récupérer le nombre de passager en attente ( beacon du stop ? )
+                  // TODO Trouver un moyen de récupérer le nombre de passager en attente ( beacon du stop ? )
                   Text('$nbPassenger passagers en attente')
                 ]),
                 Row(children: [

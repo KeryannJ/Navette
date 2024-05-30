@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:application/Helpers/PreferenceHelper.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -211,20 +212,36 @@ class CityHelper {
   }
 
   static List<int> getAvailableTravel() {
-    DateTime current = DateTime.now();
+    TimeOfDay current = TimeOfDay.fromDateTime(DateTime.now());
     if ((villesDict[villeD]!.stops.first.debOuverture != null) &&
         (villesDict[villeD]!.stops.first.finOuverture != null) &&
-        (current.isAfter(villesDict[villeD]!.stops.first.debOuverture!)) &&
-        (current.isBefore(villesDict[villeD]!.stops.first.finOuverture!))) {
+        (isTimeWithinRange(
+            current,
+            TimeOfDay.fromDateTime(
+                villesDict[villeD]!.stops.first.debOuverture!),
+            TimeOfDay.fromDateTime(
+                villesDict[villeD]!.stops.first.finOuverture!)))) {
       return [villeD, villesDict[villeD]!.stops.first.id, villeA, zone];
     }
     if ((villesDict[villeA]!.stops[stop - 1].debOuverture != null) &&
         (villesDict[villeA]!.stops[stop - 1].finOuverture != null) &&
-        (current.isAfter(villesDict[villeA]!.stops[stop - 1].debOuverture!)) &&
-        (current.isBefore(villesDict[villeA]!.stops[stop - 1].finOuverture!))) {
+        (isTimeWithinRange(
+            current,
+            TimeOfDay.fromDateTime(
+                villesDict[villeA]!.stops[stop - 1].debOuverture!),
+            TimeOfDay.fromDateTime(
+                villesDict[villeA]!.stops[stop - 1].finOuverture!)))) {
       return [villeA, stop, villeD, villesDict[villeD]!.zones.first.id];
     }
     return [];
   }
 
+  static bool isTimeWithinRange(
+      TimeOfDay current, TimeOfDay start, TimeOfDay end) {
+    final currentMinutes = current.hour * 60 + current.minute;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+  }
 }

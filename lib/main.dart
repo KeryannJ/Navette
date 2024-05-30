@@ -15,6 +15,9 @@ void main() async {
   runApp(const MaterialApp(home: Navette()));
 }
 
+// TODO balises
+// TODO notifs
+
 class Navette extends StatefulWidget {
   const Navette({super.key});
 
