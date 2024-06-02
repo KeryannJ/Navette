@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:application/Helpers/CityHelper.dart';
 import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:application/History/history.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class Travel {
@@ -35,6 +37,7 @@ class History {
 class TravelHelper {
   static Map<int, Travel> travels = {};
   static List<History> historyList = [];
+  static int currentTravel = -1;
   static Future<bool> fetchTravel() async {
     var url = Uri.parse(
         '${PreferenceHelper.navetteApi}api/v1/travel/?back_travel=true&outgoing_travel=true&is_finished=false');
@@ -54,13 +57,15 @@ class TravelHelper {
             if (villeAndStop.isEmpty && villeAndZone.isEmpty) {
               continue;
             }
-            travels.putIfAbsent(
-                id,
-                () => Travel(villeAndStop.first, villeAndStop.last,
-                    villeAndZone.first, villeAndZone.last, 0, 0));
-
             if (travels.containsKey(id)) {
               travels[id]!.addOneDriver();
+            } else {
+              var nbpassager =
+                  await CityHelper.getPassengerOfStop(villeAndStop);
+              travels.putIfAbsent(
+                  id,
+                  () => Travel(villeAndStop.first, villeAndStop.last,
+                      villeAndZone.first, villeAndZone.last, 0, nbpassager));
             }
           }
         }
@@ -115,5 +120,48 @@ class TravelHelper {
       print(e);
     }
     return false;
+  }
+
+  static Future<void> addUserToTravel(int driverId) async {
+    var urlTravelId = Uri.parse(
+        '${PreferenceHelper.navetteApi}api/v1/user/${PreferenceHelper.userId}/current_travel');
+    try {
+      http.Response response = await http.post(urlTravelId, headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+      });
+      if (response.statusCode == 200) {
+        currentTravel = jsonDecode(response.body)['id'];
+      }
+    } catch (e) {
+      print(e);
+    }
+    var url = Uri.parse(
+        '${PreferenceHelper.navetteApi}/api/v1/travel/$currentTravel/add-user/${PreferenceHelper.userId}');
+    try {
+      http.Response response = await http.get(url, headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+      });
+      throw ErrorDescription(
+          ' Erreur de récupération code d\'erreur = ${response.statusCode}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<void> removeUserFromTravel() async {
+    var url = Uri.parse(
+        '${PreferenceHelper.navetteApi}/api/v1/travel/$currentTravel/remove-user/${PreferenceHelper.userId}');
+    try {
+      http.Response response = await http.delete(url, headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+      });
+      throw ErrorDescription(
+          ' Erreur de récupération code d\'erreur = ${response.statusCode}');
+    } catch (e) {
+      print(e);
+    }
   }
 }

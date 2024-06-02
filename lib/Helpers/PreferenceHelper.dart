@@ -15,15 +15,18 @@ class PreferenceHelper {
   static String navetteAPIKey = 'NAVETTE';
   static String bearerKey = 'BEARER';
   static String userIdKey = 'USERID';
+  static String isDrivingKey = 'DRIVING';
 
   static String navetteApi = '';
   static String bearer = '';
   static int userId = -1;
+  static bool isDriving = false;
 
   static void getAllPref() {
     bearer = isNullString(_prefsInstance!.getString(bearerKey));
     navetteApi = isNullString(_prefsInstance!.getString(navetteAPIKey));
     userId = isNullInt(_prefsInstance!.getInt(userIdKey), -1);
+    isDriving = isNullBool(_prefsInstance!.getBool(isDrivingKey));
   }
 
   static bool isNullBool(bool? aBool) {
@@ -73,5 +76,9 @@ class PreferenceHelper {
 
   static void setUserId(int uid) {
     _prefsInstance!.setInt(userIdKey, uid);
+  }
+
+  static getDrivingState() async {
+    return isNullBool(_prefsInstance!.getBool(isDrivingKey));
   }
 }

@@ -34,7 +34,7 @@ class ItineraireState extends State<Itineraire> {
                       stop: travel.value.stop,
                       zone: travel.value.zone,
                       nbDriver: travel.value.driverCount,
-                      nbPassenger: 20,
+                      nbPassenger: travel.value.passengerCount,
                     );
                   },
                 )),

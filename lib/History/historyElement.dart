@@ -20,7 +20,7 @@ class HistoryElement extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
-      height: 180,
+      height: 190,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black),
@@ -43,16 +43,16 @@ class HistoryElement extends StatelessWidget {
             CityHelper.getImage(false, true, false, [villeD, stop]).isEmpty
                 ? Image.asset(
                     'assets/logo.png',
-                    height: 90,
-                    width: 90,
+                    height: 100,
+                    width: 100,
                   )
                 : Image.network(
                     CityHelper.getImage(false, true, false, [villeD, stop]),
-                    height: 90,
-                    width: 90,
+                    height: 100,
+                    width: 100,
                   ),
             Text(CityHelper.getStopNameOfCity(villeD, stop).first),
-            Text('${startTime.hour}H${startTime.hour}')
+            Text('${startTime.hour}H${startTime.minute}')
           ]),
           const Icon(
             Icons.arrow_circle_right,
@@ -62,16 +62,16 @@ class HistoryElement extends StatelessWidget {
             CityHelper.getImage(false, false, true, [villeA, zone]).isEmpty
                 ? Image.asset(
                     'assets/logo.png',
-                    height: 90,
-                    width: 90,
+                    height: 100,
+                    width: 100,
                   )
                 : Image.network(
                     CityHelper.getImage(false, false, true, [villeA, zone]),
-                    height: 90,
-                    width: 90,
+                    height: 100,
+                    width: 100,
                   ),
             Text(CityHelper.getZoneNameOfCity(villeA, zone).first),
-            Text('${endTime.hour}H${endTime.hour}')
+            Text('${endTime.hour}H${endTime.minute}')
           ])
         ]),
       ]),

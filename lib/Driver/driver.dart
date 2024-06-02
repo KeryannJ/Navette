@@ -29,7 +29,7 @@ class MapSampleState extends State<Driver> {
     target: LatLng(49.892208, 2.298158),
     zoom: 16,
   );
-  late List<int> currenTravel;
+  late List<int> currentTravel;
 
   @override
   void initState() {
@@ -51,7 +51,7 @@ class MapSampleState extends State<Driver> {
               goToUserLocation();
               updateCircle(position);
               if (CityHelper.travelOngoing) {
-                prepareRouteCreation(currenTravel);
+                prepareRouteCreation(currentTravel);
               }
             });
           }
@@ -81,19 +81,47 @@ class MapSampleState extends State<Driver> {
               label: const Text('Finir le trajet'),
               icon: const Icon(Icons.drive_eta),
               onPressed: () async {
-                await endOrStartTravel(false, []);
-                setState(() {
-                  CityHelper.travelOngoing = false;
-                  polylines.clear;
-                  polylineCoordinates.clear();
-                  markers.clear();
-                  currenTravel.clear();
-                });
+                if (!CityHelper.travelOngoing) {
+                  const snackBar = SnackBar(
+                    content: Text(
+                        'Impossible d\'arrêter un trajet n\'ayant pas débuté'),
+                    duration: Duration(seconds: 3),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+                CityHelper.travelOngoing = false;
+                if (await endOrStartTravel(false, [])) {
+                  PreferenceHelper.setBoolValue(
+                      PreferenceHelper.isDrivingKey, false);
+                  setState(() {
+                    polylines.clear;
+                    polylineCoordinates.clear();
+                    markers.clear();
+                    currentTravel.clear();
+                  });
+                } else {
+                  CityHelper.travelOngoing = true;
+                  const snackBar = SnackBar(
+                    content: Text(
+                        'Erreur lors de l\'arrêt du trajet veuillez réessayer'),
+                    duration: Duration(seconds: 3),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
               })
           : FloatingActionButton.extended(
               label: const Text('Démarrer un trajet'),
               icon: const Icon(Icons.drive_eta),
               onPressed: () async {
+                if (CityHelper.travelOngoing) {
+                  const snackBar = SnackBar(
+                    content:
+                        Text('Trajet en cours de création veuillez patienter'),
+                    duration: Duration(seconds: 3),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  return;
+                }
                 var availableStop = CityHelper.getAvailableTravel();
                 if (availableStop.isEmpty) {
                   const snackBar = SnackBar(
@@ -103,10 +131,21 @@ class MapSampleState extends State<Driver> {
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } else {
-                  await endOrStartTravel(true, availableStop);
-                  await prepareRouteCreation(availableStop);
-                  currenTravel = availableStop;
                   CityHelper.travelOngoing = true;
+                  if (await endOrStartTravel(true, availableStop)) {
+                    PreferenceHelper.setBoolValue(
+                        PreferenceHelper.isDrivingKey, true);
+                    prepareRouteCreation(availableStop);
+                    currentTravel = availableStop;
+                  } else {
+                    CityHelper.travelOngoing = false;
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Erreur lors de la création du trajet veuillez réessayer'),
+                      duration: Duration(seconds: 3),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
                 }
               }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -164,17 +203,14 @@ class MapSampleState extends State<Driver> {
       travelMode: TravelMode.driving,
     );
 
-    // Adding the coordinates to the list
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
     }
 
-    // Defining an ID
     PolylineId id = const PolylineId('poly');
 
-    // Initializing Polyline
     Polyline polyline = Polyline(
       polylineId: id,
       color: Colors.red,
@@ -182,7 +218,6 @@ class MapSampleState extends State<Driver> {
       width: 3,
     );
 
-    // Adding the polyline to the map
     setState(() {
       polylines[id] = polyline;
     });
@@ -197,7 +232,7 @@ class MapSampleState extends State<Driver> {
       radius: position.accuracy!,
       strokeWidth: 1,
       strokeColor: Colors.red,
-      fillColor: Color.fromARGB(100, 255, 0, 0),
+      fillColor: const Color.fromARGB(100, 255, 0, 0),
     ));
   }
 
@@ -210,7 +245,7 @@ class MapSampleState extends State<Driver> {
     ));
   }
 
-  Future<void> endOrStartTravel(bool isStart, List<int> travel) async {
+  Future<bool> endOrStartTravel(bool isStart, List<int> travel) async {
     var url = Uri.parse('${PreferenceHelper.navetteApi}api/v1/travel/');
     if (isStart) {
       try {
@@ -226,11 +261,12 @@ class MapSampleState extends State<Driver> {
               'driver_id': PreferenceHelper.userId,
             }));
         if (response.statusCode == 200) {
-          print('test');
+          return true;
         }
       } catch (e) {
         print(e);
       }
+      return false;
     } else {
       var travelId = -1;
       var urlTravelId = Uri.parse(
@@ -254,11 +290,12 @@ class MapSampleState extends State<Driver> {
           'Authorization': 'Bearer ${PreferenceHelper.bearer}'
         });
         if (response.statusCode == 200) {
-          print('fini');
+          return true;
         }
       } catch (e) {
         print(e);
       }
+      return false;
     }
   }
 }

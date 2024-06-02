@@ -9,7 +9,7 @@ import 'package:application/Account/itirenaryInfo.dart';
 import 'package:application/Helpers/preferenceHelper.dart';
 
 class Account extends StatefulWidget {
-  const Account({Key? key}) : super(key: key); //required this.prefs})
+  const Account({Key? key}) : super(key: key);
   @override
   State<Account> createState() {
     return _AccountState();
@@ -139,7 +139,6 @@ class _AccountState extends State<Account> {
                                 city: selectedUserData['city']['id'],
                                 zone: selectedUserData['zone']['id'],
                                 stop: selectedUserData['stop']['id'],
-                                //prefs: widget.prefs,
                               ),
                               ElevatedButton.icon(
                                 onPressed: () {

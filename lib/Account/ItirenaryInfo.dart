@@ -1,6 +1,7 @@
 import 'package:application/Common/dropDownMenu.dart';
 import 'package:application/Helpers/CityHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
 
 class ItirenaryInfo extends StatefulWidget {
   const ItirenaryInfo(
@@ -38,86 +39,139 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
         ]),
-        const Text('Aller :'),
+        const Text('Aller :',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Column(children: [
-            CityHelper.getImage(false, true, false, [widget.city, widget.stop])
-                    .isEmpty
-                ? Image.asset(
-                    'assets/logo.png',
-                    height: 75,
-                    width: 75,
-                  )
-                : Image.network(
-                    CityHelper.getImage(
-                        false, true, false, [widget.city, widget.stop]),
-                    height: 75,
-                    width: 75,
-                  ),
-            Text(CityHelper.getStopNameOfCity(widget.city, 0).first)
-          ]),
+          SizedBox(
+            height: 150,
+            width: 140,
+            child: Column(children: [
+              CityHelper.getImage(
+                      false, true, false, [widget.city, widget.stop]).isEmpty
+                  ? Image.asset(
+                      'assets/logo.png',
+                      height: 100,
+                      width: 100,
+                    )
+                  : Image.network(
+                      CityHelper.getImage(
+                          false, true, false, [widget.city, widget.stop]),
+                      height: 100,
+                      width: 100,
+                    ),
+              SizedBox(
+                height: 40,
+                width: 100,
+                child: Marquee(
+                  text: CityHelper.getStopNameOfCity(widget.city, 0).first,
+                  style: const TextStyle(fontSize: 16),
+                  scrollAxis: Axis.horizontal,
+                  blankSpace: 20.0,
+                  velocity: 50.0,
+                  pauseAfterRound: const Duration(seconds: 1),
+                  startPadding: 10.0,
+                  accelerationDuration: const Duration(seconds: 1),
+                  accelerationCurve: Curves.linear,
+                  decelerationDuration: const Duration(milliseconds: 500),
+                  decelerationCurve: Curves.easeOut,
+                ),
+              ),
+            ]),
+          ),
           const Icon(
             Icons.arrow_circle_right,
             size: 30,
           ),
-          Column(children: [
-            CityHelper.getImage(false, false, true, [widget.city, widget.zone])
-                    .isEmpty
-                ? Image.asset(
-                    'assets/logo.png',
-                    height: 75,
-                    width: 75,
-                  )
-                : Image.network(
-                    CityHelper.getImage(
-                        false, false, true, [widget.city, widget.zone]),
-                    height: 75,
-                    width: 75,
-                  ),
-            MyDropDownMenu(
-                items: CityHelper.getZoneNameOfCity(destCity, widget.zone)),
-          ])
+          SizedBox(
+            height: 150,
+            width: 140,
+            child: Column(children: [
+              CityHelper.getImage(
+                      false, false, true, [widget.city, widget.zone]).isEmpty
+                  ? Image.asset(
+                      'assets/logo.png',
+                      height: 100,
+                      width: 100,
+                    )
+                  : Image.network(
+                      CityHelper.getImage(
+                          false, false, true, [widget.city, widget.zone]),
+                      height: 100,
+                      width: 100,
+                    ),
+              MyDropDownMenu(
+                  items: CityHelper.getZoneNameOfCity(destCity, widget.zone)),
+            ]),
+          )
         ]),
-        const Text('Retour :'),
+        const Text(
+          'Retour :',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Column(children: [
-            CityHelper.getImage(true, false, false, [widget.city]).isEmpty
-                ? Image.asset(
-                    'assets/logo.png',
-                    height: 75,
-                    width: 75,
-                  )
-                : Image.network(
-                    CityHelper.getImage(true, false, false, [widget.city]),
-                    height: 75,
-                    width: 75,
-                  ),
-            Text(CityHelper.getCityName(widget.city)),
-          ]),
+          SizedBox(
+            height: 150,
+            width: 140,
+            child: Column(children: [
+              CityHelper.getImage(true, false, false, [widget.city]).isEmpty
+                  ? Image.asset(
+                      'assets/logo.png',
+                      height: 100,
+                      width: 100,
+                    )
+                  : Image.network(
+                      CityHelper.getImage(true, false, false, [widget.city]),
+                      height: 100,
+                      width: 100,
+                    ),
+              SizedBox(
+                height: 40,
+                width: 100,
+                child: Marquee(
+                  text: CityHelper.getCityName(widget.city),
+                  style: const TextStyle(fontSize: 16),
+                  scrollAxis: Axis.horizontal,
+                  blankSpace: 30.0,
+                  velocity: 50.0,
+                  pauseAfterRound: const Duration(seconds: 1),
+                  startPadding: 10.0,
+                  accelerationDuration: const Duration(seconds: 1),
+                  accelerationCurve: Curves.linear,
+                  decelerationDuration: const Duration(milliseconds: 500),
+                  decelerationCurve: Curves.easeOut,
+                ),
+              ),
+            ]),
+          ),
           const Icon(
             Icons.arrow_circle_left,
             size: 30,
           ),
-          Column(children: [
-            CityHelper.getImage(false, true, false, [destCity, widget.stop])
-                    .isEmpty
-                ? Image.asset(
-                    'assets/logo.png',
-                    height: 75,
-                    width: 75,
-                  )
-                : Image.network(
-                    CityHelper.getImage(
-                        false, true, false, [widget.city, widget.stop]),
-                    height: 75,
-                    width: 75,
-                  ),
-            MyDropDownMenu(
-              items: CityHelper.getStopNameOfCity(destCity, 1),
-            ),
-          ])
+          SizedBox(
+            height: 150,
+            width: 140,
+            child: Column(children: [
+              CityHelper.getImage(false, true, false, [destCity, widget.stop])
+                      .isEmpty
+                  ? Image.asset(
+                      'assets/logo.png',
+                      height: 100,
+                      width: 100,
+                    )
+                  : Image.network(
+                      CityHelper.getImage(
+                          false, true, false, [widget.city, widget.stop]),
+                      height: 100,
+                      width: 100,
+                    ),
+              MyDropDownMenu(
+                items: CityHelper.getStopNameOfCity(destCity, 1),
+              ),
+            ]),
+          ),
         ]),
       ]),
     );
   }
 }
+// TODO gérer le onchange

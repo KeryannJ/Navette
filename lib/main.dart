@@ -1,21 +1,32 @@
+import 'dart:async';
 import 'package:application/Driver/driver.dart';
+import 'package:application/Helpers/BeaconHelper.dart';
 import 'package:application/Helpers/CityHelper.dart';
 import 'package:application/Helpers/PreferenceHelper.dart';
 import 'package:application/History/history.dart';
 import 'package:application/Itinerary/itinerary.dart';
 import 'package:application/Account/account.dart';
+import 'package:application/Service/BeaconService.dart';
 import 'package:application/Settings/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PreferenceHelper.init();
   await CityHelper.fetchCityAndZoneAndStop();
   await CityHelper.getUserItirenaryInfo();
+  var status = await Permission.locationWhenInUse.request();
+  status = await Permission.locationAlways.request();
+  status = await Permission.bluetoothScan.request();
+  status = await Permission.bluetoothConnect.request();
+  status = await Permission.notification.request();
+  if (CityHelper.villesDict.isNotEmpty) {
+    initializeService();
+  }
   runApp(const MaterialApp(home: Navette()));
 }
-
-// TODO balises
 // TODO notifs
 
 class Navette extends StatefulWidget {
@@ -27,6 +38,7 @@ class Navette extends StatefulWidget {
 
 class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
   late TabController tabC;
+  late Timer timer;
 
   @override
   void initState() {
@@ -121,6 +133,12 @@ class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
                         await Navigator.of(context).push(showSettings());
                         await PreferenceHelper.init();
                         await CityHelper.fetchCityAndZoneAndStop();
+                        await BeaconHelper.fetchUserBeacon();
+                        final service = FlutterBackgroundService();
+                        if (CityHelper.villesDict.isNotEmpty &&
+                            !await service.isRunning()) {
+                          initializeService();
+                        }
                       }),
                 ])
               ],

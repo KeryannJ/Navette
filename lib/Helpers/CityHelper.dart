@@ -26,13 +26,14 @@ class Zone {
 
 class Stop {
   Stop(this.id, this.name, this.image, this.gps, this.debOuverture,
-      this.finOuverture);
+      this.finOuverture, this.macAdress);
   int id;
   String name;
   String? image;
   String? gps;
   DateTime? debOuverture;
   DateTime? finOuverture;
+  String? macAdress;
 }
 
 class CityHelper {
@@ -42,6 +43,7 @@ class CityHelper {
   static int stop = -1;
   static int zone = -1;
   static bool travelOngoing = false;
+  static String currentAddress = '';
   static Future fetchCityAndZoneAndStop() async {
     var format = DateFormat('HH:mm:ss.SSSSS');
     if (PreferenceHelper.navetteApi.isEmpty) {
@@ -90,7 +92,7 @@ class CityHelper {
                 }
                 tmpStops.add(
                   Stop(stop['id'], stop['name'], stop['picture'], stop['gps'],
-                      open, close),
+                      open, close, stop['address']),
                 );
               }
             }
@@ -162,8 +164,8 @@ class CityHelper {
   }
 
   static String getImage(bool isVille, bool isStop, bool isZone, List<int> id) {
-    if (isVille && villesDict[id.first]!.image != null) {
-      return villesDict[id.first]!.image!;
+    if (isVille && villesDict[id.first - 1]!.image != null) {
+      return villesDict[id.first - 1]!.image!;
     }
     if (isStop && villesDict[id.first]!.stops.isNotEmpty) {
       for (var stop in villesDict[id.first]!.stops) {
@@ -183,6 +185,10 @@ class CityHelper {
   }
 
   static Future getUserItirenaryInfo() async {
+    if (PreferenceHelper.navetteApi.isEmpty) {
+      return;
+    }
+
     var url = Uri.parse(
         '${PreferenceHelper.navetteApi}api/v1/user/${PreferenceHelper.userId}');
 
@@ -243,5 +249,56 @@ class CityHelper {
     final endMinutes = end.hour * 60 + end.minute;
 
     return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+  }
+
+  static List<int> isAddressInStops(String macAdress) {
+    for (var ville in villesDict.entries) {
+      for (var stop in ville.value.stops) {
+        if (stop.macAdress != null) {
+          if (stop.macAdress == macAdress) {
+            return [ville.value.id, stop.id];
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Future<void> changeStopCounter(bool isPlus, List<int> stop) async {
+    Uri url;
+    isPlus
+        ? url = Uri.parse(
+            '${PreferenceHelper.navetteApi}api/v1/city/${stop[0]}/stop/${stop[1]}/waiting')
+        : url = Uri.parse(
+            '${PreferenceHelper.navetteApi}api/v1/city/${stop[0]}/stop/${stop[1]}/stop_waiting');
+    try {
+      http.Response response = await http.post(url, headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+      });
+      if (response.statusCode == 200) {}
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<int> getPassengerOfStop(List<int> stop) async {
+    Uri url = Uri.parse(
+        '${PreferenceHelper.navetteApi}api/v1/city/${stop[0]}/stop/${stop[1]}');
+    try {
+      http.Response response = await http.get(url, headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Authorization': 'Bearer ${PreferenceHelper.bearer}'
+      });
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        if (data['in_wait'] != null) {
+          return data['in_wait'];
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+    return 0;
   }
 }
