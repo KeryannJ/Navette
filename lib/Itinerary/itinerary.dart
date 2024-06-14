@@ -1,7 +1,7 @@
-import 'package:application/Common/loadingPage.dart';
-import 'package:application/Helpers/CityHelper.dart';
-import 'package:application/Helpers/TravelHelper.dart';
-import 'package:application/Itinerary/stop.dart';
+import 'package:navette/Common/NoDataPage.dart';
+import 'package:navette/Common/loadingPage.dart';
+import 'package:navette/Helpers/TravelHelper.dart';
+import 'package:navette/Itinerary/stop.dart';
 import 'package:flutter/material.dart';
 
 class Itineraire extends StatefulWidget {
@@ -17,28 +17,35 @@ class ItineraireState extends State<Itineraire> {
       future: TravelHelper.fetchTravel(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text(
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                    'Trajet en cours'),
-                Expanded(
-                    child: ListView.builder(
-                  itemCount: TravelHelper.travels.length,
-                  itemBuilder: (context, index) {
-                    var travel = TravelHelper.travels.entries.elementAt(index);
-                    return StopWidget(
-                      villeD: travel.value.villeD,
-                      villeA: travel.value.villeA,
-                      stop: travel.value.stop,
-                      zone: travel.value.zone,
-                      nbDriver: travel.value.driverCount,
-                      nbPassenger: travel.value.passengerCount,
-                    );
-                  },
-                )),
-              ]);
+          if (TravelHelper.travels.isEmpty) {
+            return NoDataPage();
+          } else {}
+          return RefreshIndicator(
+              onRefresh: onRefresh,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text(
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 17),
+                        'Trajet en cours'),
+                    Expanded(
+                        child: ListView.builder(
+                      itemCount: TravelHelper.travels.length,
+                      itemBuilder: (context, index) {
+                        var travel =
+                            TravelHelper.travels.entries.elementAt(index);
+                        return StopWidget(
+                          villeD: travel.value.villeD,
+                          villeA: travel.value.villeA,
+                          stop: travel.value.stop,
+                          zone: travel.value.zone,
+                          nbDriver: travel.value.driverCount,
+                          nbPassenger: travel.value.passengerCount,
+                        );
+                      },
+                    )),
+                  ]));
         } else if (snapshot.hasError) {
           return const Text('Aucun trajet disponible');
         } else {
@@ -46,5 +53,11 @@ class ItineraireState extends State<Itineraire> {
         }
       },
     );
+  }
+
+  Future<void> onRefresh() async {
+    setState(() {
+      return;
+    });
   }
 }

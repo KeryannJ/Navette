@@ -1,6 +1,7 @@
-import 'package:application/Common/loadingPage.dart';
-import 'package:application/Helpers/TravelHelper.dart';
-import 'package:application/History/historyElement.dart';
+import 'package:navette/Common/NoDataPage.dart';
+import 'package:navette/Common/loadingPage.dart';
+import 'package:navette/Helpers/TravelHelper.dart';
+import 'package:navette/History/historyElement.dart';
 import 'package:flutter/material.dart';
 
 class History extends StatefulWidget {
@@ -31,24 +32,26 @@ class HistoryState extends State<History> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Scaffold(
-              body: ListView.builder(
-                itemCount: TravelHelper.historyList.length,
-                itemBuilder: (context, index) {
-                  var historyElt = TravelHelper.historyList[index];
-                  if (historyElt.isAway == isReturn) {
-                    return HistoryElement(
-                      startTime: historyElt.dateHeureDeb,
-                      endTime: historyElt.dateHeureFin,
-                      isAway: historyElt.isAway,
-                      isDriver: historyElt.isDriver,
-                      villeD: historyElt.villeD,
-                      villeA: historyElt.villeA,
-                      stop: historyElt.stop,
-                      zone: historyElt.zone,
-                    );
-                  }
-                },
-              ),
+              body: TravelHelper.isHistoryEmpty(isReturn)
+                  ? NoDataPage()
+                  : ListView.builder(
+                      itemCount: TravelHelper.historyList.length,
+                      itemBuilder: (context, index) {
+                        var historyElt = TravelHelper.historyList[index];
+                        if (historyElt.isAway == isReturn) {
+                          return HistoryElement(
+                            startTime: historyElt.dateHeureDeb,
+                            endTime: historyElt.dateHeureFin,
+                            isAway: historyElt.isAway,
+                            isDriver: historyElt.isDriver,
+                            villeD: historyElt.villeD,
+                            villeA: historyElt.villeA,
+                            stop: historyElt.stop,
+                            zone: historyElt.zone,
+                          );
+                        }
+                      },
+                    ),
               bottomNavigationBar: BottomNavigationBar(
                 currentIndex: selectedIndex,
                 items: const [

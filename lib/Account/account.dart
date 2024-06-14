@@ -1,13 +1,15 @@
 import 'dart:convert';
-import 'package:application/Common/loadingPage.dart';
-import 'package:application/Helpers/CityHelper.dart';
+import 'package:navette/Common/NoDataPage.dart';
+import 'package:navette/Common/loadingPage.dart';
+import 'package:navette/Helpers/CityHelper.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:application/Account/personnalInfo.dart';
-import 'package:application/Account/vehicleInfo.dart';
-import 'package:application/Account/itirenaryInfo.dart';
-import 'package:application/Helpers/preferenceHelper.dart';
+import 'package:navette/Account/personnalInfo.dart';
+import 'package:navette/Account/vehicleInfo.dart';
+import 'package:navette/Account/itirenaryInfo.dart';
 
+/// Page du compte utilisateur ou de la liste des utilisateurs selon ce qui est sélectionné
 class Account extends StatefulWidget {
   const Account({Key? key}) : super(key: key);
   @override
@@ -34,6 +36,7 @@ class _AccountState extends State<Account> {
     super.initState();
   }
 
+  /// Récupère les infos de tout les utilisateurs
   Future<List<dynamic>> fetchUserData() async {
     var url = Uri.parse('${PreferenceHelper.navetteApi}api/v1/user/');
 
@@ -55,6 +58,7 @@ class _AccountState extends State<Account> {
     return [];
   }
 
+  /// récupère lkes infos de l'utilisateur sélectionné
   Future<Map<String, dynamic>> fetchSelectedUserData() async {
     var url = Uri.parse('${PreferenceHelper.navetteApi}api/v1/user/$userId');
 
@@ -69,6 +73,8 @@ class _AccountState extends State<Account> {
         CityHelper.zone = selectedUserData['zone']['id'];
         CityHelper.stop = selectedUserData['stop']['id'];
         CityHelper.villeA = 1;
+        await PreferenceHelper.setBoolValue(
+            PreferenceHelper.isVerifiedKey, selectedUserData['verified']);
         return selectedUserData;
       } else {
         throw ErrorDescription(
@@ -129,16 +135,29 @@ class _AccountState extends State<Account> {
                                 name: selectedUserData['name'],
                                 mail: selectedUserData['email'],
                               ),
-                              VehicleInfo(
-                                modele: selectedUserData['vehicle_model'],
-                                couleur: selectedUserData['vehicle_color'],
-                                plaque:
-                                    selectedUserData['vehicle_registration'],
-                              ),
+                              (selectedUserData['verified'] as bool)
+                                  ? VehicleInfo(
+                                      modele:
+                                          selectedUserData['vehicle_model'] ??
+                                              '',
+                                      couleur:
+                                          selectedUserData['vehicle_color'] ??
+                                              '',
+                                      plaque: selectedUserData[
+                                              'vehicle_registration'] ??
+                                          '',
+                                    )
+                                  : Container(),
                               ItirenaryInfo(
-                                city: selectedUserData['city']['id'],
-                                zone: selectedUserData['zone']['id'],
-                                stop: selectedUserData['stop']['id'],
+                                city: selectedUserData['city'] != null
+                                    ? selectedUserData['city']['id']
+                                    : -1,
+                                zone: selectedUserData['zone'] != null
+                                    ? selectedUserData['zone']['id']
+                                    : -1,
+                                stop: selectedUserData['stop'] != null
+                                    ? selectedUserData['stop']['id']
+                                    : -1,
                               ),
                               ElevatedButton.icon(
                                 onPressed: () {
@@ -164,33 +183,38 @@ class _AccountState extends State<Account> {
                 future: fetchUserData(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    return Scaffold(
-                      appBar: AppBar(
-                        title: const Text('Liste des Utilisateurs'),
-                      ),
-                      body: ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          Map<String, dynamic> userData = snapshot.data![index];
-                          return ListTile(
-                              title: Text(userData['name'],
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Text(userData['email']),
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.amber,
-                                child: Text(userData['name'].substring(0, 1)),
-                              ),
-                              trailing: const Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                setState(() {
-                                  userId = snapshot.data![index]['id'];
-                                  PreferenceHelper.setUserId(userId);
+                    if (snapshot.data!.isEmpty) {
+                      return NoDataPage();
+                    } else {
+                      return Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Liste des Utilisateurs'),
+                        ),
+                        body: ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            Map<String, dynamic> userData =
+                                snapshot.data![index];
+                            return ListTile(
+                                title: Text(userData['name'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                subtitle: Text(userData['email']),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.amber,
+                                  child: Text(userData['name'].substring(0, 1)),
+                                ),
+                                trailing: const Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  setState(() {
+                                    userId = snapshot.data![index]['id'];
+                                    PreferenceHelper.setUserId(userId);
+                                  });
                                 });
-                              });
-                        },
-                      ),
-                    );
+                          },
+                        ),
+                      );
+                    }
                   } else if (snapshot.hasError) {
                     return const Text('Erreur');
                   } else {

@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:application/Helpers/PreferenceHelper.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -160,21 +160,29 @@ class CityHelper {
   }
 
   static String getCityName(int cityId) {
-    return villesDict[cityId]!.name;
+    if (villesDict[cityId] != null) {
+      return villesDict[cityId]!.name;
+    } else {
+      return 'Ville non trouvée';
+    }
   }
 
   static String getImage(bool isVille, bool isStop, bool isZone, List<int> id) {
     if (isVille && villesDict[id.first - 1]!.image != null) {
       return villesDict[id.first - 1]!.image!;
     }
-    if (isStop && villesDict[id.first]!.stops.isNotEmpty) {
+    if (isStop &&
+        villesDict[id.first] != null &&
+        villesDict[id.first]!.stops.isNotEmpty) {
       for (var stop in villesDict[id.first]!.stops) {
         if (stop.id == id.last) {
           return stop.image != null ? stop.image! : '';
         }
       }
     }
-    if (isZone && villesDict[id.first]!.zones.isNotEmpty) {
+    if (isZone &&
+        villesDict[id.first] != null &&
+        villesDict[id.first]!.zones.isNotEmpty) {
       for (var zone in villesDict[id.first]!.zones) {
         if (zone.id == id.last) {
           return zone.image != null ? zone.image! : '';

@@ -1,4 +1,5 @@
-import 'package:application/Helpers/CityHelper.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:navette/Helpers/CityHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
@@ -22,13 +23,28 @@ class StopWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         margin: const EdgeInsets.all(10),
-        height: 230,
+        height: 260,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black),
             borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: Row(children: [
           Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                RatingBarIndicator(
+                  rating: 1.0,
+                  itemBuilder: (context, index) => const Icon(
+                    Icons.directions_car,
+                    color: Colors.blue,
+                  ),
+                  itemCount: 5,
+                  itemSize: 25.0,
+                  direction: Axis.horizontal,
+                ),
+              ],
+            ),
             Row(children: [
               Column(
                 children: [
@@ -64,9 +80,9 @@ class StopWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              Padding(
+              const Padding(
                 padding: EdgeInsets.all(5),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_circle_right,
                   size: 30,
                 ),

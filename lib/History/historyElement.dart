@@ -1,4 +1,4 @@
-import 'package:application/Helpers/CityHelper.dart';
+import 'package:navette/Helpers/CityHelper.dart';
 import 'package:flutter/material.dart';
 
 class HistoryElement extends StatelessWidget {

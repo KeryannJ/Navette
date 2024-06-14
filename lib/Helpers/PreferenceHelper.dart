@@ -16,17 +16,20 @@ class PreferenceHelper {
   static String bearerKey = 'BEARER';
   static String userIdKey = 'USERID';
   static String isDrivingKey = 'DRIVING';
+  static String isVerifiedKey = 'VERIFIED';
 
   static String navetteApi = '';
   static String bearer = '';
   static int userId = -1;
   static bool isDriving = false;
+  static bool isVerified = false;
 
   static void getAllPref() {
     bearer = isNullString(_prefsInstance!.getString(bearerKey));
     navetteApi = isNullString(_prefsInstance!.getString(navetteAPIKey));
     userId = isNullInt(_prefsInstance!.getInt(userIdKey), -1);
     isDriving = isNullBool(_prefsInstance!.getBool(isDrivingKey));
+    isVerified = isNullBool(_prefsInstance!.getBool(isVerifiedKey));
   }
 
   static bool isNullBool(bool? aBool) {
@@ -53,12 +56,12 @@ class PreferenceHelper {
     }
   }
 
-  static void setBoolValue(String aStr, bool aBool) {
-    saveKeyBool(aStr, aBool);
+  static Future<void> setBoolValue(String aStr, bool aBool) async {
+    await saveKeyBool(aStr, aBool);
   }
 
-  static void saveKeyBool(String aStr, bool aBool) {
-    _prefsInstance!.setBool(aStr, aBool);
+  static Future<void> saveKeyBool(String aStr, bool aBool) async {
+    await _prefsInstance!.setBool(aStr, aBool);
   }
 
   static void setIntValue(String aStr, int aInt) {

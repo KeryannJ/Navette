@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:application/Helpers/CityHelper.dart';
-import 'package:application/Helpers/PreferenceHelper.dart';
-import 'package:application/Helpers/TravelHelper.dart';
+import 'package:navette/Helpers/CityHelper.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
+import 'package:navette/Helpers/TravelHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart' as http;
@@ -29,16 +29,19 @@ class BeaconHelper {
         // on le remonte car on va forcément y passer vu que c'est la condition
         // la plus importante
         var driver = getDriverIdFromAddress(result.device.remoteId.toString());
+        var ongoingTravel = false;
+        if (driver != -1) {
+          ongoingTravel = await TravelHelper.hasOngoingTravel(driver);
+        }
         if (!isInCar && !isStop) {
-          if (driver != -1) {
-            isInCar = true;
+          if (driver != -1 &&
+              driver != PreferenceHelper.userId &&
+              ongoingTravel) {
             TravelHelper.addUserToTravel(driver);
+            currentDriver = driver;
             found = true;
-            // on ne continue pas car 2 driver = pas possible et un on s'en fout
-            // car l'user vient de monter
-            var travel = CityHelper.getAvailableTravel();
-            notifText =
-                'Début du trajet à destination de ${CityHelper.getZoneNameOfCity(travel[2], travel[3]).first}';
+            isInCar = true;
+            notifText = 'Début du trajet';
             break;
           }
           var stop =
@@ -55,21 +58,25 @@ class BeaconHelper {
             continue;
           }
         }
-        if (isInCar && driver != -1 && currentDriver == driver) {
+        if (isInCar &&
+            driver != -1 &&
+            currentDriver == driver &&
+            ongoingTravel) {
           found = true;
           break;
         }
         if (isStop) {
-          if (driver != -1) {
+          if (driver != -1 &&
+              driver != PreferenceHelper.userId &&
+              ongoingTravel) {
             isInCar = true;
             isStop = false;
             TravelHelper.addUserToTravel(driver);
             CityHelper.changeStopCounter(false, currentStop);
+            currentDriver = driver;
             currentStop = [];
             found = true;
-            var travel = CityHelper.getAvailableTravel();
-            notifText =
-                'Début du trajet à destination de ${CityHelper.getZoneNameOfCity(travel[2], travel[3]).first}';
+            notifText = 'Début du trajet ';
           }
           var stop =
               CityHelper.isAddressInStops(result.device.remoteId.toString());
@@ -83,6 +90,7 @@ class BeaconHelper {
       }
       if (isInCar && !found) {
         TravelHelper.removeUserFromTravel();
+        currentDriver = -1;
         isInCar = false;
         notifText = 'Fin du trajet';
       }

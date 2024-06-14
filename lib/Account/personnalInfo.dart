@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Information de l'utilisateur
 class PersonnalInfo extends StatelessWidget {
   const PersonnalInfo({super.key, required this.name, required this.mail});
   final String name;
@@ -9,7 +10,7 @@ class PersonnalInfo extends StatelessWidget {
     return Container(
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.all(10),
-        height: 210,
+        height: 220,
         width: 500,
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black),

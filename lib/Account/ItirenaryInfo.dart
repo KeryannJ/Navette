@@ -1,8 +1,9 @@
-import 'package:application/Common/dropDownMenu.dart';
-import 'package:application/Helpers/CityHelper.dart';
+import 'package:navette/Common/dropDownMenu.dart';
+import 'package:navette/Helpers/CityHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
+/// Page des itinéraires utilisateur ( aller / retour )
 class ItirenaryInfo extends StatefulWidget {
   const ItirenaryInfo(
       {super.key, required this.city, required this.zone, required this.stop});
@@ -26,7 +27,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
     return Container(
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.all(10),
-      height: 400,
+      height: 410,
       width: 500,
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black),

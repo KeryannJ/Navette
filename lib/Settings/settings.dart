@@ -1,6 +1,5 @@
-import 'package:application/Common/loadingPage.dart';
-import 'package:application/Helpers/CityHelper.dart';
-import 'package:application/Helpers/PreferenceHelper.dart';
+import 'package:navette/Common/loadingPage.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 
 class Settings extends StatefulWidget {

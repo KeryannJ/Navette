@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// information sur le véhicule de l'utilisateur
 class VehicleInfo extends StatelessWidget {
   const VehicleInfo(
       {super.key,
@@ -15,7 +16,7 @@ class VehicleInfo extends StatelessWidget {
     return Container(
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.all(10),
-        height: 300,
+        height: 310,
         width: 500,
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black),

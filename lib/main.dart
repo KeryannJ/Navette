@@ -1,13 +1,14 @@
 import 'dart:async';
-import 'package:application/Driver/driver.dart';
-import 'package:application/Helpers/BeaconHelper.dart';
-import 'package:application/Helpers/CityHelper.dart';
-import 'package:application/Helpers/PreferenceHelper.dart';
-import 'package:application/History/history.dart';
-import 'package:application/Itinerary/itinerary.dart';
-import 'package:application/Account/account.dart';
-import 'package:application/Service/BeaconService.dart';
-import 'package:application/Settings/settings.dart';
+import 'dart:ui';
+import 'package:navette/Driver/driver.dart';
+import 'package:navette/Helpers/BeaconHelper.dart';
+import 'package:navette/Helpers/CityHelper.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
+import 'package:navette/History/history.dart';
+import 'package:navette/Itinerary/itinerary.dart';
+import 'package:navette/Account/account.dart';
+import 'package:navette/Service/BeaconService.dart';
+import 'package:navette/Settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -23,11 +24,10 @@ void main() async {
   status = await Permission.bluetoothConnect.request();
   status = await Permission.notification.request();
   if (CityHelper.villesDict.isNotEmpty) {
-    initializeService();
+    BeaconService.initializeService();
   }
   runApp(const MaterialApp(home: Navette()));
 }
-// TODO notifs
 
 class Navette extends StatefulWidget {
   const Navette({super.key});
@@ -36,13 +36,14 @@ class Navette extends StatefulWidget {
   State<Navette> createState() => NavetteState();
 }
 
-class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
+class NavetteState extends State<Navette> with TickerProviderStateMixin {
   late TabController tabC;
   late Timer timer;
 
   @override
   void initState() {
-    tabC = TabController(length: 3, vsync: this);
+    tabC =
+        TabController(length: PreferenceHelper.isVerified ? 3 : 2, vsync: this);
     super.initState();
   }
 
@@ -88,7 +89,7 @@ class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: DefaultTabController(
-        length: 3,
+        length: PreferenceHelper.isVerified ? 3 : 2,
         child: Scaffold(
           appBar: AppBar(
             title: Row(
@@ -100,31 +101,15 @@ class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
                   width: 70,
                 ),
                 Row(children: [
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.notifications),
-                    onSelected: (String result) {
-                      // TODO gérer la sélection d'une notification
-                    },
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'Notif 1',
-                        child: Text('Notif 1'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'Notif 2',
-                        child: Text('Notif 2'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'Notif 3',
-                        child: Text('Notif 3'),
-                      ),
-                    ],
-                  ),
                   IconButton(
                       onPressed: () async {
                         await Navigator.of(context).push(showAccount());
                         await PreferenceHelper.init();
+                        setState(() {
+                          tabC = TabController(
+                              length: PreferenceHelper.isVerified ? 3 : 2,
+                              vsync: this);
+                        });
                       },
                       icon: const Icon(Icons.account_circle)),
                   IconButton(
@@ -135,9 +120,10 @@ class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
                         await CityHelper.fetchCityAndZoneAndStop();
                         await BeaconHelper.fetchUserBeacon();
                         final service = FlutterBackgroundService();
+
                         if (CityHelper.villesDict.isNotEmpty &&
                             !await service.isRunning()) {
-                          initializeService();
+                          BeaconService.initializeService();
                         }
                       }),
                 ])
@@ -149,21 +135,31 @@ class NavetteState extends State<Navette> with SingleTickerProviderStateMixin {
                   tabC.animateTo(value);
                 }
               },
-              tabs: const [
-                Tab(text: 'Itinéraire', icon: Icon(Icons.transform)),
-                Tab(text: 'Conducteur', icon: Icon(Icons.directions_car)),
-                Tab(text: 'Historique', icon: Icon(Icons.history)),
-              ],
+              tabs: PreferenceHelper.isVerified
+                  ? const [
+                      Tab(text: 'Itinéraire', icon: Icon(Icons.transform)),
+                      Tab(text: 'Conducteur', icon: Icon(Icons.directions_car)),
+                      Tab(text: 'Historique', icon: Icon(Icons.history)),
+                    ]
+                  : const [
+                      Tab(text: 'Itinéraire', icon: Icon(Icons.transform)),
+                      Tab(text: 'Historique', icon: Icon(Icons.history)),
+                    ],
             ),
           ),
           body: TabBarView(
             controller: tabC,
             physics: const NeverScrollableScrollPhysics(),
-            children: const [
-              Itineraire(),
-              Driver(),
-              History(),
-            ],
+            children: PreferenceHelper.isVerified
+                ? const [
+                    Itineraire(),
+                    Driver(),
+                    History(),
+                  ]
+                : const [
+                    Itineraire(),
+                    History(),
+                  ],
           ),
         ),
       ),

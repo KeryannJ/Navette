@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:application/Helpers/CityHelper.dart';
-import 'package:application/Helpers/PreferenceHelper.dart';
+import 'package:navette/Helpers/CityHelper.dart';
+import 'package:navette/Helpers/PreferenceHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:navette/Helpers/TravelHelper.dart';
 
+/// Page permettant de commencer / finir trajet
 class Driver extends StatefulWidget {
   const Driver({super.key});
 
@@ -16,20 +18,27 @@ class Driver extends StatefulWidget {
 }
 
 class MapSampleState extends State<Driver> {
+  // Controller de la map
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+  // Coordonnées du trajet
   List<LatLng> polylineCoordinates = [];
   Map<PolylineId, Polyline> polylines = {};
+  // position actuelle de l'utilisateur
   late LocationData currentPosition;
   late Location location;
+  // Marqueur sur la map représentant les points de passages
   Set<Marker> markers = {};
+  // Icone de l'utilisateur
   Set<Circle> userCircle = {};
   bool _isUserLocationAvailable = false;
   CameraPosition _kGooglePlex = const CameraPosition(
     target: LatLng(49.892208, 2.298158),
     zoom: 16,
   );
+  // trajet en cours ( départ et arrivée )
   late List<int> currentTravel;
+  int numberOfPassenger = 0;
 
   @override
   void initState() {
@@ -38,8 +47,20 @@ class MapSampleState extends State<Driver> {
     location.requestPermission().then((granted) {
       if (granted == PermissionStatus.granted) {
         location.getLocation().then((value) => currentPosition = value);
-        location.onLocationChanged.listen((LocationData position) {
+        location.onLocationChanged.listen((LocationData position) async {
           if (mounted) {
+            _isUserLocationAvailable = true;
+            goToUserLocation();
+            updateCircle(position);
+            if (CityHelper.travelOngoing) {
+              var prevNumberOfPassenger = numberOfPassenger;
+              numberOfPassenger = await TravelHelper.getNumberOfPassenger();
+              if (prevNumberOfPassenger != numberOfPassenger) {
+                showCustomDialog(
+                    context, prevNumberOfPassenger < numberOfPassenger);
+              }
+              await prepareRouteCreation(currentTravel);
+            }
             setState(() {
               currentPosition = position;
               _kGooglePlex = CameraPosition(
@@ -47,12 +68,6 @@ class MapSampleState extends State<Driver> {
                     currentPosition.latitude!, currentPosition.longitude!),
                 zoom: 16,
               );
-              _isUserLocationAvailable = true;
-              goToUserLocation();
-              updateCircle(position);
-              if (CityHelper.travelOngoing) {
-                prepareRouteCreation(currentTravel);
-              }
             });
           }
         });
@@ -62,8 +77,8 @@ class MapSampleState extends State<Driver> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
+    return Stack(children: [
+      GoogleMap(
         circles: userCircle,
         mapType: MapType.normal,
         initialCameraPosition: _kGooglePlex,
@@ -76,80 +91,106 @@ class MapSampleState extends State<Driver> {
         markers: markers,
         polylines: Set<Polyline>.of(polylines.values),
       ),
-      floatingActionButton: CityHelper.travelOngoing
-          ? FloatingActionButton.extended(
-              label: const Text('Finir le trajet'),
-              icon: const Icon(Icons.drive_eta),
-              onPressed: () async {
-                if (!CityHelper.travelOngoing) {
-                  const snackBar = SnackBar(
-                    content: Text(
-                        'Impossible d\'arrêter un trajet n\'ayant pas débuté'),
-                    duration: Duration(seconds: 3),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                CityHelper.travelOngoing = false;
-                if (await endOrStartTravel(false, [])) {
-                  PreferenceHelper.setBoolValue(
-                      PreferenceHelper.isDrivingKey, false);
-                  setState(() {
-                    polylines.clear;
-                    polylineCoordinates.clear();
-                    markers.clear();
-                    currentTravel.clear();
-                  });
-                } else {
-                  CityHelper.travelOngoing = true;
-                  const snackBar = SnackBar(
-                    content: Text(
-                        'Erreur lors de l\'arrêt du trajet veuillez réessayer'),
-                    duration: Duration(seconds: 3),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-              })
-          : FloatingActionButton.extended(
-              label: const Text('Démarrer un trajet'),
-              icon: const Icon(Icons.drive_eta),
-              onPressed: () async {
-                if (CityHelper.travelOngoing) {
-                  const snackBar = SnackBar(
-                    content:
-                        Text('Trajet en cours de création veuillez patienter'),
-                    duration: Duration(seconds: 3),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  return;
-                }
-                var availableStop = CityHelper.getAvailableTravel();
-                if (availableStop.isEmpty) {
-                  const snackBar = SnackBar(
-                    content: Text(
-                        'Veuillez nous excuser mais le service n\'est pas disponible pour le moment, revenez plus tard'),
-                    duration: Duration(seconds: 3),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                } else {
-                  CityHelper.travelOngoing = true;
-                  if (await endOrStartTravel(true, availableStop)) {
-                    PreferenceHelper.setBoolValue(
-                        PreferenceHelper.isDrivingKey, true);
-                    prepareRouteCreation(availableStop);
-                    currentTravel = availableStop;
-                  } else {
-                    CityHelper.travelOngoing = false;
+      Positioned(
+        bottom: 20,
+        left: MediaQuery.of(context).size.width / 2 - 85,
+        child: CityHelper.travelOngoing
+            ? FloatingActionButton.extended(
+                label: const Text('Finir le trajet'),
+                icon: const Icon(Icons.drive_eta),
+                onPressed: () async {
+                  if (!CityHelper.travelOngoing) {
                     const snackBar = SnackBar(
                       content: Text(
-                          'Erreur lors de la création du trajet veuillez réessayer'),
+                          'Impossible d\'arrêter un trajet n\'ayant pas débuté'),
                       duration: Duration(seconds: 3),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }
-                }
-              }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+                  CityHelper.travelOngoing = false;
+                  if (await endOrStartTravel(false, [])) {
+                    PreferenceHelper.setBoolValue(
+                        PreferenceHelper.isDrivingKey, false);
+                    setState(() {
+                      polylines.clear;
+                      polylineCoordinates.clear();
+                      markers.clear();
+                      currentTravel.clear();
+                    });
+                  } else {
+                    CityHelper.travelOngoing = true;
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Erreur lors de l\'arrêt du trajet veuillez réessayer'),
+                      duration: Duration(seconds: 3),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                })
+            : FloatingActionButton.extended(
+                label: const Text('Démarrer un trajet'),
+                icon: const Icon(Icons.drive_eta),
+                onPressed: () async {
+                  if (CityHelper.travelOngoing) {
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Trajet en cours de création veuillez patienter'),
+                      duration: Duration(seconds: 3),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    return;
+                  }
+                  var availableStop = CityHelper.getAvailableTravel();
+                  if (availableStop.isEmpty) {
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Veuillez nous excuser mais le service n\'est pas disponible pour le moment, revenez plus tard'),
+                      duration: Duration(seconds: 3),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  } else {
+                    CityHelper.travelOngoing = true;
+                    if (await endOrStartTravel(true, availableStop)) {
+                      PreferenceHelper.setBoolValue(
+                          PreferenceHelper.isDrivingKey, true);
+                      prepareRouteCreation(availableStop);
+                      currentTravel = availableStop;
+                    } else {
+                      CityHelper.travelOngoing = false;
+                      const snackBar = SnackBar(
+                        content: Text(
+                            'Erreur lors de la création du trajet veuillez réessayer'),
+                        duration: Duration(seconds: 3),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  }
+                }),
+      ),
+      CityHelper.travelOngoing
+          ? Positioned(
+              left: 30,
+              bottom: 30,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.person,
+                    size: 30.0,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '$numberOfPassenger',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Container(),
+    ]);
   }
 
   Future<void> prepareRouteCreation(List<int> travel) async {
@@ -297,5 +338,52 @@ class MapSampleState extends State<Driver> {
       }
       return false;
     }
+  }
+
+  void showCustomDialog(BuildContext context, bool isPlus) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 5), () {
+          Navigator.of(context).pop(true);
+        });
+
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.info,
+                size: 50,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 20),
+              isPlus
+                  ? const Text(
+                      "Un passager vient de d'entrer dans le véhicule",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    )
+                  : const Text(
+                      "Un passager vient de sortir du véhicule",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
