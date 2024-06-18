@@ -1,3 +1,4 @@
+import 'package:marquee/marquee.dart';
 import 'package:navette/Helpers/CityHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,8 @@ class HistoryElement extends StatelessWidget {
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
-      child: Column(children: [
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -51,7 +53,23 @@ class HistoryElement extends StatelessWidget {
                     height: 100,
                     width: 100,
                   ),
-            Text(CityHelper.getStopNameOfCity(villeD, stop).first),
+            SizedBox(
+              height: 22,
+              width: 100,
+              child: Marquee(
+                text: CityHelper.getStopNameOfCity(villeD, stop).first,
+                style: const TextStyle(fontSize: 16),
+                scrollAxis: Axis.horizontal,
+                blankSpace: 20.0,
+                velocity: 50.0,
+                pauseAfterRound: const Duration(seconds: 1),
+                startPadding: 10.0,
+                accelerationDuration: const Duration(seconds: 1),
+                accelerationCurve: Curves.linear,
+                decelerationDuration: const Duration(milliseconds: 500),
+                decelerationCurve: Curves.easeOut,
+              ),
+            ),
             Text('${startTime.hour}H${startTime.minute}')
           ]),
           const Icon(
@@ -70,7 +88,23 @@ class HistoryElement extends StatelessWidget {
                     height: 100,
                     width: 100,
                   ),
-            Text(CityHelper.getZoneNameOfCity(villeA, zone).first),
+            SizedBox(
+              height: 22,
+              width: 100,
+              child: Marquee(
+                text: CityHelper.getZoneNameOfCity(villeA, zone).first,
+                style: const TextStyle(fontSize: 16),
+                scrollAxis: Axis.horizontal,
+                blankSpace: 20.0,
+                velocity: 50.0,
+                pauseAfterRound: const Duration(seconds: 1),
+                startPadding: 10.0,
+                accelerationDuration: const Duration(seconds: 1),
+                accelerationCurve: Curves.linear,
+                decelerationDuration: const Duration(milliseconds: 500),
+                decelerationCurve: Curves.easeOut,
+              ),
+            ),
             Text('${endTime.hour}H${endTime.minute}')
           ])
         ]),

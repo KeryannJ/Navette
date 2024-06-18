@@ -200,22 +200,27 @@ class MapSampleState extends State<Driver> {
     _kGooglePlex = CameraPosition(
       target: LatLng(currentPosition.latitude!, currentPosition.longitude!),
     );
-    List<String> latLngD =
-        CityHelper.villesDict[travel[0]]!.stops[travel[1] - 1].gps!.split(',');
+    late Stop aStop;
+    late Zone aZone;
+    for (var stop in CityHelper.villesDict[travel[0]]!.stops) {
+      if (stop.id == travel[1]) {
+        aStop = stop;
+      }
+    }
+    for (var zone in CityHelper.villesDict[travel[2]]!.zones) {
+      aZone = zone;
+    }
+
+    List<String> latLngD = aStop.gps!.split(',');
     LatLng depart =
         LatLng(double.parse(latLngD.first), double.parse(latLngD.last));
 
-    List<String> latLngA =
-        CityHelper.villesDict[travel[2]]!.zones[travel[3] - 1].gps!.split(',');
+    List<String> latLngA = aZone.gps!.split(',');
     LatLng arrivee =
         LatLng(double.parse(latLngA.first), double.parse(latLngA.last));
 
-    await _createPolylines(
-        CityHelper.villesDict[travel[0]]!.stops[travel[1] - 1].gps!,
-        depart.latitude,
-        depart.longitude,
-        arrivee.latitude,
-        arrivee.longitude);
+    await _createPolylines(aStop.gps!, depart.latitude, depart.longitude,
+        arrivee.latitude, arrivee.longitude);
   }
 
   _createPolylines(

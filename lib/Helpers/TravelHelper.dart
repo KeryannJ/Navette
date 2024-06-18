@@ -63,8 +63,8 @@ class TravelHelper {
                   await CityHelper.getPassengerOfStop(villeAndStop);
               travels.putIfAbsent(
                   id,
-                  () => Travel(villeAndStop.first, villeAndStop.last,
-                      villeAndZone.first, villeAndZone.last, 1, nbpassager));
+                  () => Travel(villeAndStop.first, villeAndZone.first,
+                      villeAndStop.last, villeAndZone.last, 1, nbpassager));
             }
           }
         }
@@ -107,8 +107,8 @@ class TravelHelper {
                 DateTime.parse(historyElt['finished_at']),
                 historyElt['is_driver'],
                 villeAndStop.first,
-                villeAndStop.last,
                 villeAndZone.first,
+                villeAndStop.last,
                 villeAndZone.last,
                 historyElt['back_travel']));
           }

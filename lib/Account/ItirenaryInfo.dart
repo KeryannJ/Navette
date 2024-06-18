@@ -47,8 +47,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
             height: 150,
             width: 140,
             child: Column(children: [
-              CityHelper.getImage(
-                      false, true, false, [widget.city, widget.stop]).isEmpty
+              CityHelper.getImage(false, true, false, [widget.city, 20]).isEmpty
                   ? Image.asset(
                       'assets/logo.png',
                       height: 100,
@@ -56,7 +55,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
                     )
                   : Image.network(
                       CityHelper.getImage(
-                          false, true, false, [widget.city, widget.stop]),
+                          false, true, false, [widget.city, 20]),
                       height: 100,
                       width: 100,
                     ),
@@ -64,7 +63,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
                 height: 40,
                 width: 100,
                 child: Marquee(
-                  text: CityHelper.getStopNameOfCity(widget.city, 0).first,
+                  text: CityHelper.getStopNameOfCity(widget.city, 20).first,
                   style: const TextStyle(fontSize: 16),
                   scrollAxis: Axis.horizontal,
                   blankSpace: 20.0,
@@ -87,8 +86,8 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
             height: 150,
             width: 140,
             child: Column(children: [
-              CityHelper.getImage(
-                      false, false, true, [widget.city, widget.zone]).isEmpty
+              CityHelper.getImage(false, false, true, [destCity, widget.zone])
+                      .isEmpty
                   ? Image.asset(
                       'assets/logo.png',
                       height: 100,
@@ -96,7 +95,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
                     )
                   : Image.network(
                       CityHelper.getImage(
-                          false, false, true, [widget.city, widget.zone]),
+                          false, false, true, [destCity, widget.zone]),
                       height: 100,
                       width: 100,
                     ),
@@ -161,7 +160,7 @@ class _ItirenaryInfo extends State<ItirenaryInfo> {
                     )
                   : Image.network(
                       CityHelper.getImage(
-                          false, true, false, [widget.city, widget.stop]),
+                          false, true, false, [destCity, widget.stop]),
                       height: 100,
                       width: 100,
                     ),

@@ -35,21 +35,26 @@ class HistoryState extends State<History> {
               body: TravelHelper.isHistoryEmpty(isReturn)
                   ? NoDataPage()
                   : ListView.builder(
-                      itemCount: TravelHelper.historyList.length,
+                      itemCount: TravelHelper.historyList
+                          .where((historyElt) => historyElt.isAway == isReturn)
+                          .toList()
+                          .length,
                       itemBuilder: (context, index) {
-                        var historyElt = TravelHelper.historyList[index];
-                        if (historyElt.isAway == isReturn) {
-                          return HistoryElement(
-                            startTime: historyElt.dateHeureDeb,
-                            endTime: historyElt.dateHeureFin,
-                            isAway: historyElt.isAway,
-                            isDriver: historyElt.isDriver,
-                            villeD: historyElt.villeD,
-                            villeA: historyElt.villeA,
-                            stop: historyElt.stop,
-                            zone: historyElt.zone,
-                          );
-                        }
+                        var filteredList = TravelHelper.historyList
+                            .where(
+                                (historyElt) => historyElt.isAway == isReturn)
+                            .toList();
+                        var historyElt = filteredList[index];
+                        return HistoryElement(
+                          startTime: historyElt.dateHeureDeb,
+                          endTime: historyElt.dateHeureFin,
+                          isAway: historyElt.isAway,
+                          isDriver: historyElt.isDriver,
+                          villeD: historyElt.villeD,
+                          villeA: historyElt.villeA,
+                          stop: historyElt.stop,
+                          zone: historyElt.zone,
+                        );
                       },
                     ),
               bottomNavigationBar: BottomNavigationBar(

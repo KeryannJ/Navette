@@ -168,8 +168,8 @@ class CityHelper {
   }
 
   static String getImage(bool isVille, bool isStop, bool isZone, List<int> id) {
-    if (isVille && villesDict[id.first - 1]!.image != null) {
-      return villesDict[id.first - 1]!.image!;
+    if (isVille && villesDict[id.first]!.image != null) {
+      return villesDict[id.first]!.image!;
     }
     if (isStop &&
         villesDict[id.first] != null &&
@@ -237,15 +237,20 @@ class CityHelper {
                 villesDict[villeD]!.stops.first.finOuverture!)))) {
       return [villeD, villesDict[villeD]!.stops.first.id, villeA, zone];
     }
-    if ((villesDict[villeA]!.stops[stop - 1].debOuverture != null) &&
-        (villesDict[villeA]!.stops[stop - 1].finOuverture != null) &&
-        (isTimeWithinRange(
-            current,
-            TimeOfDay.fromDateTime(
-                villesDict[villeA]!.stops[stop - 1].debOuverture!),
-            TimeOfDay.fromDateTime(
-                villesDict[villeA]!.stops[stop - 1].finOuverture!)))) {
-      return [villeA, stop, villeD, villesDict[villeD]!.zones.first.id];
+    for (var aStop in villesDict[villeA]!.stops) {
+      if (aStop.id != stop) {
+        continue;
+      }
+      if ((aStop.debOuverture != null) &&
+          (aStop.finOuverture != null) &&
+          (isTimeWithinRange(
+              current,
+              TimeOfDay.fromDateTime(
+                  aStop.debOuverture!),
+              TimeOfDay.fromDateTime(
+                  aStop.finOuverture!)))) {
+        return [villeA, stop, villeD, villesDict[villeD]!.zones.first.id];
+      }
     }
     return [];
   }
